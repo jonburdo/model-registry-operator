@@ -13,9 +13,9 @@ items:
       app.kubernetes.io/part-of: model-registry
       component: model-registry-job
       modelregistry.kubeflow.org/job-type: async-upload
-      modelregistry.kubeflow.org/model-sync-model-artifact-id: "5"
-      modelregistry.kubeflow.org/model-sync-model-id: "8"
-      modelregistry.kubeflow.org/model-sync-model-version-id: "9"
+      modelregistry.kubeflow.org/model-sync-model-artifact-id: "6"
+      modelregistry.kubeflow.org/model-sync-model-id: "10"
+      modelregistry.kubeflow.org/model-sync-model-version-id: "11"
     name: my-async-upload-job
   spec:
     template:
@@ -25,9 +25,9 @@ items:
           app.kubernetes.io/name: model-registry-async-job
           component: model-registry-job
           modelregistry.kubeflow.org/job-type: async-upload
-          modelregistry.kubeflow.org/model-sync-model-artifact-id: "5"
-          modelregistry.kubeflow.org/model-sync-model-id: "8"
-          modelregistry.kubeflow.org/model-sync-model-version-id: "9"
+          modelregistry.kubeflow.org/model-sync-model-artifact-id: "6"
+          modelregistry.kubeflow.org/model-sync-model-id: "10"
+          modelregistry.kubeflow.org/model-sync-model-version-id: "11"
       spec:
         containers:
         - env:
@@ -38,11 +38,11 @@ items:
           - name: MODEL_SYNC_REGISTRY_AUTHOR
             value: jobs-async-upload
           - name: MODEL_SYNC_MODEL_ID
-            value: "8"
+            value: "10"
           - name: MODEL_SYNC_MODEL_VERSION_ID
-            value: "9"
+            value: "11"
           - name: MODEL_SYNC_MODEL_ARTIFACT_ID
-            value: "5"
+            value: "6"
           - name: MODEL_SYNC_SOURCE_TYPE
             value: uri
           - name: MODEL_SYNC_SOURCE_URI
