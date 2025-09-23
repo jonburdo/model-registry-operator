@@ -2,9 +2,9 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
-  name: jobs-async-upload-s3-to-oci-template
+  name: jobs-async-upload-uri-to-oci-template
   annotations:
-    description: "Example OpenShift template for the Model Registry jobs/async-upload going from S3 to OCI (KServe ModelCar)"
+    description: "Example OpenShift template for the Model Registry jobs/async-upload going from URI to OCI (KServe ModelCar)"
 parameters:
   - name: JOB_IMAGE
     description: The container image for the Job
@@ -18,7 +18,7 @@ parameters:
     required: false
   - name: MODEL_SYNC_MODEL_ARTIFACT_ID
     description: The ModelArtifact ID in the Model Registry
-    required: false
+    required: false 
   - name: MODEL_SYNC_REGISTRY_SERVER_ADDRESS
     description: The address of the Model Registry, ref. the MR py client documentation
     required: true
@@ -30,14 +30,40 @@ parameters:
     required: true
     value: "jobs-async-upload"
   - name: SOURCE_CONNECTION
-    description: "Name of the Connection resource for the Source (e.g.: S3, URI ('https://', 'hf://', 'http://'))"
+    description: The name of the connection resource for the source
+  - name: MODEL_SYNC_SOURCE_URI
+    description: The URI to download the model from
     required: true
-  - name: DESTINATION_CONNECTION
-    description: "Name of the Connection resource for the Sink destination (e.g.: OCI)"
-    required: true
-  - name: MODEL_SYNC_SOURCE_AWS_KEY
-    description: The path in the S3 bucket
-    required: true
+  - name: MODEL_SYNC_REGISTRY_USER_TOKEN_ENVVAR
+    description: The environment variable name for the registry user token
+    required: false
+    value: "KF_PIPELINES_SA_TOKEN_PATH"
+  - name: KF_PIPELINES_SA_TOKEN_PATH
+    description: The path to the service account token
+    required: false
+    value: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  - name: MODEL_SYNC_DESTINATION_TYPE
+    description: The destination type
+    required: false
+    value: "oci"
+  - name: MODEL_SYNC_DESTINATION_OCI_URI
+    description: The OCI URI for the destination
+    required: false
+  - name: MODEL_SYNC_DESTINATION_OCI_REGISTRY
+    description: The OCI registry for the destination
+    required: false
+  - name: MODEL_SYNC_DESTINATION_OCI_BASE_IMAGE
+    description: The base image for OCI destination
+    required: false
+    value: "registry.access.redhat.com/ubi8/ubi-minimal:latest"
+  - name: OCI_AUTH_SECRET_NAME
+    description: The name of the secret containing OCI username and password
+    required: false
+    value: "oci-auth-secret"
+  - name: MODEL_SYNC_DESTINATION_OCI_ENABLE_TLS_VERIFY
+    description: Enable TLS verification for OCI destination
+    required: false
+    value: "false"
   - name: MODEL_SYNC_MODEL_UPLOAD_INTENT
     description: The upload intent for the model sync operation
     required: false
@@ -45,6 +71,7 @@ parameters:
   - name: MODEL_METADATA_CONFIGMAP
     description: "Name of the ConfigMap containing model metadata (required for create_model and create_version intents)"
     required: false
+    value: "model-metadata"
 objects:
   - apiVersion: batch/v1
     kind: Job
@@ -76,13 +103,7 @@ objects:
         spec:
           securityContext:
             runAsNonRoot: true
-          volumes: # Source and Sink Connection resources
-            - name: source-credentials
-              secret:
-                secretName: ${SOURCE_CONNECTION}
-            - name: destination-credentials
-              secret:
-                secretName: ${DESTINATION_CONNECTION}
+          volumes:
             - name: model-metadata
               configMap:
                 name: ${MODEL_METADATA_CONFIGMAP}
@@ -104,13 +125,7 @@ objects:
                   memory: "128Mi"
                 limits:
                   memory: "512Mi"
-              volumeMounts: # Source and Sink Connection resources
-                - name: source-credentials
-                  readOnly: true
-                  mountPath: "/opt/creds/source"
-                - name: destination-credentials
-                  readOnly: true
-                  mountPath: "/opt/creds/destination"
+              volumeMounts:
                 - name: model-metadata
                   readOnly: true
                   mountPath: "/etc/model-metadata"
@@ -127,10 +142,34 @@ objects:
                   value: "${MODEL_SYNC_MODEL_VERSION_ID}"
                 - name: MODEL_SYNC_MODEL_ARTIFACT_ID
                   value: "${MODEL_SYNC_MODEL_ARTIFACT_ID}"
-                - name: MODEL_SYNC_SOURCE_S3_CREDENTIALS_PATH
-                  value: "/opt/creds/source"
-                - name: MODEL_SYNC_SOURCE_AWS_KEY
-                  value: "${MODEL_SYNC_SOURCE_AWS_KEY}"
+                - name: MODEL_SYNC_SOURCE_TYPE
+                  value: "uri"
+                - name: MODEL_SYNC_SOURCE_URI
+                  value: "${MODEL_SYNC_SOURCE_URI}"
+                - name: MODEL_SYNC_REGISTRY_USER_TOKEN_ENVVAR
+                  value: "${MODEL_SYNC_REGISTRY_USER_TOKEN_ENVVAR}"
+                - name: KF_PIPELINES_SA_TOKEN_PATH
+                  value: "${KF_PIPELINES_SA_TOKEN_PATH}"
+                - name: MODEL_SYNC_DESTINATION_TYPE
+                  value: "${MODEL_SYNC_DESTINATION_TYPE}"
+                - name: MODEL_SYNC_DESTINATION_OCI_URI
+                  value: "${MODEL_SYNC_DESTINATION_OCI_URI}"
+                - name: MODEL_SYNC_DESTINATION_OCI_REGISTRY
+                  value: "${MODEL_SYNC_DESTINATION_OCI_REGISTRY}"
+                - name: MODEL_SYNC_DESTINATION_OCI_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${OCI_AUTH_SECRET_NAME}
+                      key: username
+                - name: MODEL_SYNC_DESTINATION_OCI_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${OCI_AUTH_SECRET_NAME}
+                      key: password
+                - name: MODEL_SYNC_DESTINATION_OCI_ENABLE_TLS_VERIFY
+                  value: "${MODEL_SYNC_DESTINATION_OCI_ENABLE_TLS_VERIFY}"
+                - name: MODEL_SYNC_DESTINATION_OCI_BASE_IMAGE
+                  value: "${MODEL_SYNC_DESTINATION_OCI_BASE_IMAGE}"
                 - name: MODEL_SYNC_MODEL_UPLOAD_INTENT
                   value: "${MODEL_SYNC_MODEL_UPLOAD_INTENT}"
                 - name: MODEL_SYNC_METADATA_CONFIGMAP_PATH
