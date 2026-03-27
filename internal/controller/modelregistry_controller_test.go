@@ -1302,7 +1302,7 @@ func validateRegistryKubeRBACProxy(ctx context.Context, typeNamespaceName types.
 		matchRoute := Succeed()
 		// Check the migrated KubeRBACProxy configuration for route setting
 		updated := &v1beta1.ModelRegistry{}
-		k8sClient.Get(ctx, typeNamespaceName, updated)
+		Expect(k8sClient.Get(ctx, typeNamespaceName, updated)).To(Succeed())
 		if updated.Spec.KubeRBACProxy != nil && updated.Spec.KubeRBACProxy.ServiceRoute == config.RouteDisabled {
 			matchRoute = Not(Succeed())
 		}

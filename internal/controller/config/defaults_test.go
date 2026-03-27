@@ -410,7 +410,7 @@ func TestDeploymentWithResources(t *testing.T) {
 
 func TestCatalogDeployment(t *testing.T) {
 	// Clear any env vars from previous tests
-	os.Unsetenv(config.RestImage)
+	_ = os.Unsetenv(config.RestImage)
 
 	// parse all templates
 	templates, err := config.ParseTemplates()
@@ -508,8 +508,8 @@ func TestCatalogDeployment(t *testing.T) {
 
 func TestCatalogPostgresSecret(t *testing.T) {
 	// Clear any env vars from previous tests
-	os.Unsetenv(config.CatalogPostgresUser)
-	os.Unsetenv(config.CatalogPostgresDatabase)
+	_ = os.Unsetenv(config.CatalogPostgresUser)
+	_ = os.Unsetenv(config.CatalogPostgresDatabase)
 
 	// parse all templates
 	templates, err := config.ParseTemplates()
@@ -609,7 +609,7 @@ func TestSetRegistriesNamespace(t *testing.T) {
 			if res := config.GetRegistriesNamespace(); !tt.wantErr && res != tt.args.namespace {
 				t.Errorf("GetRegistriesNamespace() expected %s, received %s", tt.args.namespace, res)
 			}
-			config.SetRegistriesNamespace("")
+			_ = config.SetRegistriesNamespace("")
 		})
 	}
 }

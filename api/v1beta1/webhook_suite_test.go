@@ -151,7 +151,7 @@ var _ = BeforeSuite(func() {
 		if err != nil {
 			return err
 		}
-		conn.Close()
+		_ = conn.Close()
 		return nil
 	}).Should(Succeed())
 
@@ -169,7 +169,7 @@ var _ = Describe("Model Registry validating webhook", func() {
 
 	It("Should not allow creation of duplicate MR instance in cluster", func(ctx context.Context) {
 		Eventually(func() error {
-			config.SetRegistriesNamespace("") // run this test with no ns restrictions
+			_ = config.SetRegistriesNamespace("") // run this test with no ns restrictions
 			suffix1 := "-mr1"
 			suffix2 := "-mr2"
 			// create mr1
@@ -188,7 +188,7 @@ var _ = Describe("Model Registry validating webhook", func() {
 
 	It("Should not allow creation of MR instance with invalid database config", func(ctx context.Context) {
 		Eventually(func() error {
-			config.SetRegistriesNamespace(namespaceBase)
+			_ = config.SetRegistriesNamespace(namespaceBase)
 			mr := newModelRegistry(ctx, mrNameBase+"-invalid-db-create", namespaceBase)
 			mr.Spec = v1beta1.ModelRegistrySpec{
 				MySQL: &v1beta1.MySQLConfig{},
@@ -202,7 +202,7 @@ var _ = Describe("Model Registry validating webhook", func() {
 
 	It("Should not allow update of MR instance with invalid database config", func(ctx context.Context) {
 		Eventually(func() error {
-			config.SetRegistriesNamespace(namespaceBase)
+			_ = config.SetRegistriesNamespace(namespaceBase)
 			mr := newModelRegistry(ctx, mrNameBase+"-invalid-db-update", namespaceBase)
 			Expect(k8sClient.Create(ctx, mr)).Should(Succeed())
 
@@ -218,7 +218,7 @@ var _ = Describe("Model Registry validating webhook", func() {
 
 	It("Should not allow creating MR instance in a different namespace when registries namespace is set", func(ctx context.Context) {
 		Eventually(func() error {
-			config.SetRegistriesNamespace(namespaceBase)
+			_ = config.SetRegistriesNamespace(namespaceBase)
 			mr := newModelRegistry(ctx, mrNameBase, namespaceBase)
 			Expect(k8sClient.Create(ctx, mr)).Should(Succeed())
 			Expect(k8sClient.Delete(ctx, mr)).Should(Succeed())
@@ -233,7 +233,7 @@ var _ = Describe("Model Registry validating webhook", func() {
 
 	It("Should support creating MR instance with OAuth Proxy configured", func(ctx context.Context) {
 		Eventually(func() error {
-			config.SetRegistriesNamespace(namespaceBase)
+			_ = config.SetRegistriesNamespace(namespaceBase)
 			mr := newModelRegistry(ctx, mrNameBase, namespaceBase)
 			mr.Spec.OAuthProxy = &v1beta1.OAuthProxyConfig{}
 			Expect(k8sClient.Create(ctx, mr)).Should(Succeed())
@@ -245,7 +245,7 @@ var _ = Describe("Model Registry validating webhook", func() {
 
 	It("Should support creating MR instance with KubeRBACProxy configured", func(ctx context.Context) {
 		Eventually(func() error {
-			config.SetRegistriesNamespace(namespaceBase)
+			_ = config.SetRegistriesNamespace(namespaceBase)
 			mr := newModelRegistry(ctx, mrNameBase, namespaceBase)
 			mr.Spec.KubeRBACProxy = &v1beta1.KubeRBACProxyConfig{}
 			Expect(k8sClient.Create(ctx, mr)).Should(Succeed())
@@ -420,7 +420,7 @@ var _ = Describe("ModelRegistry Conversion Webhook", func() {
 			testNamespace = corev1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{Name: namespaceBase},
 			}
-			config.SetRegistriesNamespace(namespaceBase)
+			_ = config.SetRegistriesNamespace(namespaceBase)
 			Expect(client.IgnoreAlreadyExists(k8sClient.Create(ctx, &testNamespace))).Should(Succeed())
 
 			// create oldObj

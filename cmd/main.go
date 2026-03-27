@@ -141,7 +141,7 @@ func main() {
 	setupLog.Info("default registry config", config.RegistriesNamespace, registriesNamespace, config.DefaultDomain, defaultDomain)
 
 	// set default values for defaulting webhook
-	config.SetRegistriesNamespace(registriesNamespace)
+	_ = config.SetRegistriesNamespace(registriesNamespace)
 
 	// Only cache the instances of these objects that are created by this operator.
 	objOptions := cache.ByObject{

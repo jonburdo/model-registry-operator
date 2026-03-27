@@ -17,7 +17,7 @@ func DownloadFile(url string, path string) error {
 		return err
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 400 {
 		return fmt.Errorf("unable to fetch %q: %s", url, resp.Status)
@@ -28,7 +28,7 @@ func DownloadFile(url string, path string) error {
 		return err
 	}
 
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {

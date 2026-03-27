@@ -11,8 +11,7 @@ import (
 )
 
 var (
-	certName = "test-cert"
-	domain   = "example.com"
+	domain = "example.com"
 )
 
 func TestValidateNamespace(t *testing.T) {
@@ -46,9 +45,9 @@ func TestValidateNamespace(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			config.SetRegistriesNamespace(tt.registriesNamespace)
+			_ = config.SetRegistriesNamespace(tt.registriesNamespace)
 			errList := tt.registry.ValidateNamespace()
-			config.SetRegistriesNamespace("")
+			_ = config.SetRegistriesNamespace("")
 			if tt.wantErr {
 				if len(errList) == 0 {
 					t.Errorf("ValidateNamespace() error = %v, wantErr %v", errList, tt.wantErr)
